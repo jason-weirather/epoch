@@ -1,0 +1,2 @@
+epoch/data/*/*.h5 filter=lfs diff=lfs merge=lfs -text
+epoch/data/*/groups/*.h5 filter=lfs diff=lfs merge=lfs -text
