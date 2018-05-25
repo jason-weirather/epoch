@@ -3,6 +3,14 @@ import numpy as np
 import os, math
 
 _udir = os.path.dirname(os.path.realpath(__file__))
+
+def _collect_best_entropy(projects,project_column,filename,myclass):
+    eo = pd.read_hdf(filename)
+    if projects is None: return pd.Series(list(eo.sort_values('redundancy',ascending=False)['case_submitter_id']))
+    v = eo.merge(myclass.get_meta(),left_on='case_submitter_id',right_index=True).\
+                 sort_values('redundancy',ascending=False)
+    return pd.Series(list(v.loc[v[project_column].isin(projects)].sort_values('redundancy',ascending=False)['case_submitter_id']))
+
 class TCGA:
     def __init__(self,*args,**kw):
         return
@@ -36,7 +44,10 @@ class TCGA:
     @classmethod
     def get_projects(TCGA): 
         return TCGA.__select_projects(None).index
-
+    @classmethod
+    def best_entropy(TCGA,projects=None):
+        return _collect_best_entropy(projects,'project',os.path.join(_udir,'data/TCGA/entropy-order.h5'),TCGA)
+        
 class GTEx:
     def __init__(self,*args,**kw):
         return
@@ -70,3 +81,6 @@ class GTEx:
     @classmethod
     def get_tissue_types(GTEx): 
         return GTEx.__select_tissues(None).index
+    @classmethod
+    def best_entropy(GTEx,tissue_types=None):
+        return _collect_best_entropy(tissue_types,'SMTS',os.path.join(_udir,'data/GTEx/entropy-order.h5'),GTEx)
